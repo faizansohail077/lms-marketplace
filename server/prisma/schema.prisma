@@ -1,11 +1,5 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
   binaryTargets = ["native", "linux-arm64-openssl-3.0.x"]
 }
 
@@ -15,17 +9,106 @@ datasource db {
 }
 
 model User {
-  id    Int     @id @default(autoincrement())
-  email String  @unique
-  name  String?
-  posts Post[]
+  id          Int      @id @default(autoincrement())
+  
+  email       String   @unique
+  name        String?
+  profile     String?
+  
+  role        ROLE     @default(USER)
+  courses     Course[] @relation("TeacherCourses") 
+  reviews     Review[]
+  enrollments Enrollment[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
-model Post {
+model Course {
+  id          Int              @id @default(autoincrement())
+  title       String
+  description String
+  price       Decimal          @default(0.00)
+  content     Content[]
+  material    CourseMaterial[]
+  reviews     Review[]
+  enrollments Enrollment[]
+  isFree     Boolean          @default(false)
+  published   Boolean          @default(false)
+  status      CourseStatus     @default(PENDING)
+  teacherId   Int
+  teacher     User             @relation("TeacherCourses", fields: [teacherId], references: [id])
+
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+}
+
+model Content {
+  id        Int       @id @default(autoincrement())
+  details   ContentDetail[]
+  courseId  Int
+  course    Course   @relation(fields: [courseId], references: [id])
+}
+
+model ContentDetail {
+  id        Int               @id @default(autoincrement())
+  type      CourseContentType @default(VIDEO)
+  video     String?
+  text      String?
+  quiz      String?
+  contentId Int
+  content   Content           @relation(fields: [contentId], references: [id])
+}
+
+model CourseMaterial {
+  id       Int    @id @default(autoincrement())
+  fileUrl  String
+  courseId Int
+  course   Course @relation(fields: [courseId], references: [id])
+}
+
+model Review {
+  id        Int      @id @default(autoincrement())
+  rating    Int
+  comment   String
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  courseId  Int
+  course    Course   @relation(fields: [courseId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Enrollment {
   id        Int     @id @default(autoincrement())
-  title     String
-  content   String?
-  published Boolean @default(false)
-  author    User    @relation(fields: [authorId], references: [id])
-  authorId  Int
+  userId    Int
+  user      User    @relation(fields: [userId], references: [id])
+  courseId  Int
+  course    Course  @relation(fields: [courseId], references: [id])
+  status    EnrollmentStatus @default(ACTIVE)
+  enrolledAt DateTime @default(now())
+}
+
+enum CourseContentType {
+  VIDEO
+  TEXT
+  QUIZ
+}
+
+enum ROLE {
+  ADMIN
+  USER
+  TEACHER
+}
+
+enum CourseStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum EnrollmentStatus {
+  ACTIVE
+  COMPLETED
+  CANCELED
 }
