@@ -1,19 +1,19 @@
-import express, { Express, Request, Response } from "express";
+import express, { Express } from "express";
 import dotenv from "dotenv";
-import { PrismaClient } from '@prisma/client'
-
-const prisma = new PrismaClient()
+import { userRouter } from "./api/router/user/index.js";
 
 dotenv.config();
 
 const app: Express = express();
 const port = process.env.PORT || 3000;
 
-app.get("/", async (req: Request, res: Response) => {
-  const user = await prisma.user.findMany()
-  res.send({ message: "Express + TypeScript Server edote" ,user});
+app.use(express.json());
 
-});
+app.use('/api/v1/user', userRouter)
+
+app.use("*", (_, res) => {
+  res.status(404).send("404 route not found")
+})
 
 app.listen(port, () => {
   console.log(`[server]: Server is running at http://localhost:${port}`);

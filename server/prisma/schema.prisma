@@ -9,19 +9,20 @@ datasource db {
 }
 
 model User {
-  id          Int      @id @default(autoincrement())
-  
-  email       String   @unique
-  name        String?
-  profile     String?
-  
-  role        ROLE     @default(USER)
-  courses     Course[] @relation("TeacherCourses") 
+  id Int @id @default(autoincrement())
+
+  email    String  @unique
+  name     String?
+  profile  String?
+  password String
+
+  role        ROLE         @default(USER)
+  courses     Course[]     @relation("TeacherCourses")
   reviews     Review[]
   enrollments Enrollment[]
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Course {
@@ -33,21 +34,21 @@ model Course {
   material    CourseMaterial[]
   reviews     Review[]
   enrollments Enrollment[]
-  isFree     Boolean          @default(false)
+  isFree      Boolean          @default(false)
   published   Boolean          @default(false)
   status      CourseStatus     @default(PENDING)
   teacherId   Int
   teacher     User             @relation("TeacherCourses", fields: [teacherId], references: [id])
 
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Content {
-  id        Int       @id @default(autoincrement())
-  details   ContentDetail[]
-  courseId  Int
-  course    Course   @relation(fields: [courseId], references: [id])
+  id       Int             @id @default(autoincrement())
+  details  ContentDetail[]
+  courseId Int
+  course   Course          @relation(fields: [courseId], references: [id])
 }
 
 model ContentDetail {
@@ -80,13 +81,13 @@ model Review {
 }
 
 model Enrollment {
-  id        Int     @id @default(autoincrement())
-  userId    Int
-  user      User    @relation(fields: [userId], references: [id])
-  courseId  Int
-  course    Course  @relation(fields: [courseId], references: [id])
-  status    EnrollmentStatus @default(ACTIVE)
-  enrolledAt DateTime @default(now())
+  id         Int              @id @default(autoincrement())
+  userId     Int
+  user       User             @relation(fields: [userId], references: [id])
+  courseId   Int
+  course     Course           @relation(fields: [courseId], references: [id])
+  status     EnrollmentStatus @default(ACTIVE)
+  enrolledAt DateTime         @default(now())
 }
 
 enum CourseContentType {
